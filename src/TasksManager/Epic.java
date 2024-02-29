@@ -2,33 +2,28 @@ package TasksManager;
 
 import java.util.ArrayList;
 
-class Epic extends Task {
+public class Epic extends Task {
 
-    private ArrayList<Subtask> subtasks = new ArrayList<>();
+    private ArrayList<Integer> subtasksId = new ArrayList<>();
 
-    protected Epic(int id, String name, String description) {
+    public Epic(String name, String description) {
+        super(name, description);
+    }
+
+    public Epic(int id, String name, String description) {
         super(id, name, description);
     }
 
-    protected Epic(int id, String name, String description, Status status, ArrayList<Subtask> subtasks) {
-        super(id, name, description, status);
-        this.subtasks = subtasks;
+    public void addSubtaskId(Integer subtaskId) {
+        subtasksId.add(subtaskId);
     }
 
-    protected void addSubtask(Subtask subtask) {
-        subtasks.add(subtask);
+    public ArrayList<Integer> getSubtasks() {
+        return new ArrayList<>(subtasksId);
     }
 
-    protected ArrayList<Subtask> getSubtasks() {
-        return subtasks;
-    }
-
-    protected void clearListSubtask() {
-        subtasks.clear();
-    }
-
-    protected void removeSubtask(Subtask subtask) {
-        subtasks.remove(subtask);
+    public void removeSubtask(Integer subtaskId) {
+        subtasksId.remove(subtaskId);
     }
 
     @Override
@@ -38,7 +33,7 @@ class Epic extends Task {
                 ", description='" + this.getDescription() + '\'' +
                 ", id=" + this.getId() +
                 ", status=" + this.getStatus() +
-                ", subtask=" + subtasks +
+                ", subtask=" + subtasksId +
                 '}';
     }
 }

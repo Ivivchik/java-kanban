@@ -1,23 +1,21 @@
 package TasksManager;
 
-class Subtask extends Task {
+public class Subtask extends Task {
 
-    private Epic epic;
+    private int epicId;
 
-    protected Subtask(int id, String name, String description, Epic epic) {
-        super(id, name, description);
-        this.epic = epic;
+    public Subtask(String name, String description, int epicId) {
+        super(name, description);
+        this.epicId = epicId;
     }
 
-    protected Subtask(int id, String name, String description, Status status, Epic epic) {
+    public Subtask(int id, String name, String description, Status status) {
         super(id, name, description, status);
-        this.epic = epic;
     }
 
-    public Epic getEpic() {
-        return epic;
+    public int getEpicId() {
+        return epicId;
     }
-
 
     @Override
     public String toString() {
