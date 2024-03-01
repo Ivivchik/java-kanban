@@ -52,8 +52,10 @@ public class Main {
         Epic newEpic1 = new Epic(3, "epic1", "new desc for epic1");
         manager.updateEpic(newEpic1);
 
-        Subtask newSubtask1 = new Subtask(5, "subtask 111", "", Status.DONE);
+        Subtask newSubtask1 = new Subtask(5, "subtask 111", "", Status.DONE, 3);
         manager.updateSubtask(newSubtask1);
+        Subtask newSubtask2 = new Subtask(6, "subtask 111", "", Status.NEW, 3);
+        manager.updateSubtask(newSubtask2);
 
         System.out.println("Get list Tasks, Epics, Subtasks after update");
         System.out.println(manager.getTasks());
