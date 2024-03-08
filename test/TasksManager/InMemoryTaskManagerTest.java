@@ -97,15 +97,14 @@ class InMemoryTaskManagerTest {
     @Test
     void addToHistory() {
         Task task = new Task(1, "task name", "task description", Status.NEW);
-        Task copyTask = new Task(1, "task name", "task description", Status.NEW);
         int taskId = taskManager.createTask(task);
+        Task returnedTask = taskManager.getTask(taskId);
+
         Task newTask = new Task(taskId, "new task name", "new task description", Status.DONE);
 
         taskManager.updateTask(newTask);
 
-        Task historyTask = taskManager.getHistoryManager().getHistory().get(0);
-
-        assertEquals(copyTask, historyTask);
+        assertEquals(task, taskManager.getHistory().get(0));
 
     }
 

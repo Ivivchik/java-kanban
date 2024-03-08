@@ -1,15 +1,14 @@
 package TasksManager;
 
 import HistoryManager.HistoryManager;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public interface TaskManager {
-    ArrayList<Epic> getEpics();
+    List<Epic> getEpics();
 
-    ArrayList<Task> getTasks();
+    List<Task> getTasks();
 
-    ArrayList<Subtask> getSubtasks();
+    List<Subtask> getSubtasks();
 
     int createTask(Task task);
 
@@ -35,7 +34,7 @@ public interface TaskManager {
 
     void removeAllEpic();
 
-    ArrayList<Subtask> getTaskFromEpic(int epicId);
+    List<Subtask> getTaskFromEpic(int epicId);
 
     void updateTask(Task newTask);
 
@@ -43,5 +42,5 @@ public interface TaskManager {
 
     void updateSubtask(Subtask newSubtask);
 
-    HistoryManager getHistoryManager();
+     List<Task> getHistory();
 }
