@@ -66,7 +66,6 @@ class InMemoryTaskManagerTest {
         taskManager.updateTask(newTaskIncorrectId);
         updatedTask = taskManager.getTask(taskId);
         assertEquals(task, updatedTask);
-
     }
 
     @Test
@@ -75,7 +74,7 @@ class InMemoryTaskManagerTest {
         int epicId = taskManager.createEpic(epic);
         Epic newEpic = new Epic(epicId, "new epic name", "new epic description");
 
-        taskManager.updateEpic(newEpic);
+        taskManager. updateEpic(newEpic);
 
         Epic updatedEpic = taskManager.getEpic(epicId);
         assertEquals(epic, updatedEpic);
@@ -105,7 +104,6 @@ class InMemoryTaskManagerTest {
         taskManager.updateTask(newTask);
 
         assertEquals(task, taskManager.getHistory().get(0));
-
     }
 
     @Test
@@ -121,7 +119,5 @@ class InMemoryTaskManagerTest {
         taskManager.updateSubtask(newSubtask);
 
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
-
-
     }
 }

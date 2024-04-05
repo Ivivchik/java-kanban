@@ -1,6 +1,5 @@
 package TasksManager;
 
-import HistoryManager.HistoryManager;
 import java.util.List;
 
 public interface TaskManager {
@@ -42,5 +41,5 @@ public interface TaskManager {
 
     void updateSubtask(Subtask newSubtask);
 
-     List<Task> getHistory();
+    List<Task> getHistory();
 }

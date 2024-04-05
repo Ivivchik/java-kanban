@@ -2,7 +2,7 @@ package TasksManager;
 
 public class Subtask extends Task {
 
-    private int epicId;
+    private final int epicId;
 
     public Subtask(String name, String description, int epicId) {
         super(name, description);
