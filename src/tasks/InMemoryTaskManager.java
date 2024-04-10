@@ -1,11 +1,11 @@
 package tasks;
 
-import history.HistoryManager;
 import utils.Manager;
+import history.HistoryManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 public class InMemoryTaskManager implements TaskManager {
 
