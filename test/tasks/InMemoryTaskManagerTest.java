@@ -97,7 +97,6 @@ class InMemoryTaskManagerTest {
     void addToHistory() {
         Task task = new Task(1, "task name", "task description", Status.NEW);
         int taskId = taskManager.createTask(task);
-        Task returnedTask = taskManager.getTask(taskId);
 
         Task newTask = new Task(taskId, "new task name", "new task description", Status.DONE);
 
