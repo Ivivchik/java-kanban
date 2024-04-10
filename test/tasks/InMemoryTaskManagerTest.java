@@ -1,4 +1,4 @@
-package TasksManager;
+package tasks;
 
 import org.junit.jupiter.api.*;
 import utils.Manager;

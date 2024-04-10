@@ -1,6 +1,6 @@
-package HistoryManager;
+package history;
 
-import TasksManager.Task;
+import tasks.Task;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import utils.Manager;

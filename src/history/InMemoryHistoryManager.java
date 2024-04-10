@@ -1,9 +1,16 @@
-package HistoryManager;
+package history;
 
-import TasksManager.Task;
+import tasks.Task;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+
+class Node {
+    Node prev;
+    Node next;
+    Task data;
+}
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -22,5 +29,15 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory() {
         return new ArrayList<>(historyList);
+    }
+
+    @Override
+    public void remove(int id) {
+        for (Task task : historyList) {
+            if (task.getId() == id) {
+                historyList.remove(task);
+                break;
+            }
+        }
     }
 }
