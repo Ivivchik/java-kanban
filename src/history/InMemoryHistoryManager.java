@@ -3,40 +3,96 @@ package history;
 import tasks.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-class Node {
-    Node prev;
-    Node next;
-    Task data;
-}
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final ArrayList<Task> historyList = new ArrayList<>(10);
+    private final HashMap<Integer, Node> historyMap = new HashMap<>();
+    private Node first;
+    private Node last;
+
+    private class Node {
+        Node prev;
+        Node next;
+        Task data;
+
+        Node(Node prev, Task data, Node next) {
+            this.data = data;
+            this.next = next;
+            this.prev = prev;
+        }
+    }
+
+    private Node linkLast(Node newNode) {
+        Node l = last;
+        last = newNode;
+        if (l == null) {
+            first = newNode;
+        } else {
+            newNode.prev = l;
+            l.next = newNode;
+
+        }
+        return newNode;
+    }
+
+    private List<Task> getTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
+        Node f = first;
+        while (f != null) {
+            tasks.add(f.data);
+            f = f.next;
+        }
+        return tasks;
+    }
+
+    private void removeNode(Node node) {
+        if (node == null) {
+            return;
+        }
+        Node p = node.prev;
+        Node n = node.next;
+
+        node.prev = null;
+        node.next = null;
+
+        if (p != null) {
+            p.next = n;
+        } else {
+            first = n;
+        }
+        if (n != null) {
+            n.prev = p;
+        } else {
+            last = p;
+        }
+    }
+
 
     @Override
     public void add(Task task) {
-        if (historyList.size() < 10) {
-            historyList.add(task);
+        int taskId = task.getId();
+        if (historyMap.containsKey(taskId)) {
+            Node n = historyMap.get(taskId);
+            removeNode(n);
+            linkLast(n);
         } else {
-            historyList.remove(0);
-            historyList.add(task);
+            Node newNode = new Node(null, task, null);
+            historyMap.put(taskId, linkLast(newNode));
         }
     }
 
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(historyList);
+        return getTasks();
     }
 
     @Override
     public void remove(int id) {
-        for (Task task : historyList) {
-            if (task.getId() == id) {
-                historyList.remove(task);
-                break;
-            }
-        }
+        Node n = historyMap.get(id);
+        removeNode(n);
+        historyMap.remove(id);
     }
 }
