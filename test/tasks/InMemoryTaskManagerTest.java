@@ -1,9 +1,10 @@
-package TasksManager;
+package tasks;
 
 import org.junit.jupiter.api.*;
-import utils.Manager;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import utils.Manager;
 
 class InMemoryTaskManagerTest {
 
@@ -74,7 +75,7 @@ class InMemoryTaskManagerTest {
         int epicId = taskManager.createEpic(epic);
         Epic newEpic = new Epic(epicId, "new epic name", "new epic description");
 
-        taskManager. updateEpic(newEpic);
+        taskManager.updateEpic(newEpic);
 
         Epic updatedEpic = taskManager.getEpic(epicId);
         assertEquals(epic, updatedEpic);
@@ -97,11 +98,12 @@ class InMemoryTaskManagerTest {
     void addToHistory() {
         Task task = new Task(1, "task name", "task description", Status.NEW);
         int taskId = taskManager.createTask(task);
-        Task returnedTask = taskManager.getTask(taskId);
+        taskManager.getTask(1);
 
         Task newTask = new Task(taskId, "new task name", "new task description", Status.DONE);
 
         taskManager.updateTask(newTask);
+        taskManager.getTask(1);
 
         assertEquals(task, taskManager.getHistory().get(0));
     }

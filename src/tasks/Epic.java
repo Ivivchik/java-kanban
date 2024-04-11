@@ -1,4 +1,4 @@
-package TasksManager;
+package tasks;
 
 import java.util.ArrayList;
 
@@ -26,7 +26,7 @@ public class Epic extends Task {
         subtasksId.remove(subtaskId);
     }
 
-    public void removeAllSubtasks(){
+    public void removeAllSubtasks() {
         subtasksId.clear();
     }
 

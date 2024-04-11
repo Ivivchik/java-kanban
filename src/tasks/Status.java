@@ -1,4 +1,4 @@
-package TasksManager;
+package tasks;
 
 public enum Status {
     DONE,
