@@ -29,13 +29,4 @@ public class Epic extends Task {
     public void removeAllSubtasks() {
         subtasksId.clear();
     }
-
-    @Override
-    public String toString() {
-        return id + "," +
-                this.getClass().getSimpleName() + "," +
-                name + "," +
-                description + "," +
-                status + ",";
-    }
 }
