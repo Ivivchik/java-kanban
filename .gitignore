@@ -28,3 +28,6 @@ hs_err_pid*
 
 #Mac files
 .DS_Store
+
+#recources files
+/resources
