@@ -1,29 +1,18 @@
 package tasks;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
+import java.io.*;
 import java.util.List;
+import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 
 import utils.ManagerSaveException;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private File path;
+    private final File path;
 
-    public FileBackedTaskManager(String p) {
-        path = new File(p);
-        if (!path.exists()) {
-            try {
-                Files.createFile(path.toPath());
-            } catch (IOException e) {
-                throw new ManagerSaveException(e.getMessage());
-            }
-        }
+    public FileBackedTaskManager(File path) {
+        this.path = path;
     }
 
     private void save() throws ManagerSaveException {
@@ -58,6 +47,89 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         bw.write(String.join(",", historyId));
+    }
+
+    private Task taskFromString(String value) {
+        String[] strArr = value.split(",");
+
+        String type = strArr[1];
+        switch (type) {
+            case "Task":
+                return new Task(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]));
+            case "Epic":
+                return new Epic(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]));
+            case "Subtask":
+                return new Subtask(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]), Integer.parseInt(strArr[5]));
+            default:
+                return null;
+        }
+    }
+
+    private Status statusFromString(String value) {
+        switch (value) {
+            case "NEW":
+                return Status.NEW;
+            case "DONE":
+                return Status.DONE;
+            case "IN_PROGRESS":
+                return Status.IN_PROGRESS;
+            default:
+                return null;
+        }
+    }
+
+    private static void addTask(Task task, FileBackedTaskManager fm) {
+        if (task.getClass() == Epic.class) {
+            fm.epics.put(task.getId(), (Epic) task);
+        } else if (task.getClass() == Subtask.class) {
+            fm.subtasks.put(task.getId(), (Subtask) task);
+        } else {
+            fm.tasks.put(task.getId(), task);
+        }
+    }
+
+    private static void addHistoryTask(String value, FileBackedTaskManager fm) {
+        if (value != null) {
+            String[] indicators = value.split(",");
+            for (String indicator : indicators) {
+                int id = Integer.parseInt(indicator);
+                if (fm.tasks.containsKey(id)) {
+                    fm.getTask(id);
+                }
+                if (fm.epics.containsKey(id)) {
+                    fm.getEpic(id);
+                }
+                if (fm.subtasks.containsKey(id)) {
+                    fm.getSubtask(id);
+                }
+            }
+        }
+    }
+
+    static FileBackedTaskManager loadFromFile(File file) {
+        FileBackedTaskManager fm = new FileBackedTaskManager(file);
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+
+            br.readLine(); // read header
+            String str;
+            while ((str = br.readLine()) != null && (!str.equals(""))) {
+                System.out.println(str);
+
+                Task task = fm.taskFromString(str);
+                if (task != null) {
+                    addTask(task, fm);
+                }
+            }
+
+            String history = br.readLine();
+            addHistoryTask(history, fm);
+
+        } catch (IOException e) {
+            throw new ManagerSaveException(e.getMessage());
+        }
+
+        return fm;
     }
 
     @Override
@@ -137,16 +209,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public Task getTask(int id) {
-        return super.getTask(id);
+        Task t = super.getTask(id);
+        save();
+        return t;
     }
 
     @Override
     public Epic getEpic(int id) {
-        return super.getEpic(id);
+        Epic e = super.getEpic(id);
+        save();
+        return e;
     }
 
     @Override
     public Subtask getSubtask(int id) {
-        return super.getSubtask(id);
+        Subtask s = super.getSubtask(id);
+        save();
+        return s;
     }
 }
