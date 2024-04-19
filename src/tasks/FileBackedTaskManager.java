@@ -114,8 +114,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             br.readLine(); // read header
             String str;
             while ((str = br.readLine()) != null && (!str.equals(""))) {
-                System.out.println(str);
-
                 Task task = fm.taskFromString(str);
                 if (task != null) {
                     addTask(task, fm);
