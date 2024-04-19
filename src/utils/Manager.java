@@ -7,8 +7,6 @@ import tasks.InMemoryTaskManager;
 import history.InMemoryHistoryManager;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 
 public class Manager {
 
@@ -20,16 +18,7 @@ public class Manager {
         return new InMemoryHistoryManager();
     }
 
-    public static FileBackedTaskManager getFileTaskManager(String path) {
-
-        File f = new File(path);
-        if (!f.exists()) {
-            try {
-                Files.createFile(f.toPath());
-            } catch (IOException e) {
-                throw new ManagerSaveException(e.getMessage());
-            }
-        }
+    public static FileBackedTaskManager getFileTaskManager(File f) {
         return new FileBackedTaskManager(f);
     }
 }
