@@ -6,6 +6,7 @@ import utils.Manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,6 +14,15 @@ class FileBackedTaskManagerTest {
 
     private File f;
     private FileBackedTaskManager fm;
+
+    private int[] fromListToArray(List<Task> arr) {
+        int[] res = new int[arr.size()];
+        for (int i = 0; i < arr.size(); i++) {
+            res[i] = arr.get(i).getId();
+        }
+
+        return res;
+    }
 
     @BeforeEach
     void init() throws IOException {
@@ -85,7 +95,7 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void testHistoryFromFile() {
+    void testReadHistoryFromFile() {
 
         Task task1 = new Task("task 1", "desc for task1");
         Task task2 = new Task("task 2", "desc for task2");
@@ -142,6 +152,29 @@ class FileBackedTaskManagerTest {
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
         assertEquals(7, fbtm.cntId);
+    }
 
+    @Test
+    void testReadEpicFromFile() {
+
+
+        Epic epic1 = new Epic("epic 1", "desc for epic1");
+        Epic epic2 = new Epic("epic 2", "desc for epic2");
+        int epic1Id = fm.createEpic(epic1);
+        int epic2Id = fm.createEpic(epic2);
+
+        Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epic1Id);
+        Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epic1Id);
+        int subtask1Id = fm.createSubtask(subtask1);
+        int subtask2Id = fm.createSubtask(subtask2);
+
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
+
+        Integer [] subtasksIdEtalon = {subtask1Id, subtask2Id};
+        Integer [] subtasksIdFromFile = {};
+        subtasksIdFromFile = fbtm.getEpic(epic1Id).getSubtasks().toArray(subtasksIdFromFile);
+
+        assertTrue(fbtm.getEpic(epic2Id).getSubtasks().isEmpty());
+        assertArrayEquals(subtasksIdEtalon, subtasksIdFromFile);
     }
 }
