@@ -116,14 +116,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 
+            int lastTaskId = 0;
+
             br.readLine(); // read header
             String str;
             while ((str = br.readLine()) != null && (!str.equals(""))) {
                 Task task = fm.taskFromString(str);
                 if (task != null) {
                     addTask(task, fm);
+
+                    int taskId = task.getId();
+                    if (taskId > lastTaskId) {
+                        lastTaskId = taskId;
+                    }
                 }
             }
+
+            fm.cntId = lastTaskId + 1;
 
             String history = br.readLine();
             addHistoryTask(history, fm);
