@@ -26,9 +26,9 @@ class FileBackedTaskManagerTest {
         Task task = new Task("task", "desc for task");
         int taskId = fm.createTask(task);
 
-        FileBackedTaskManager.loadFromFile(f);
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
-        Task taskFromFile = fm.getTask(taskId);
+        Task taskFromFile = fbtm.getTask(taskId);
 
         assertEquals(task, taskFromFile);
 
@@ -39,23 +39,22 @@ class FileBackedTaskManagerTest {
 
         Task task = new Task("task", "desc for task");
         int taskId = fm.createTask(task);
-
-        FileBackedTaskManager.loadFromFile(f);
-
         fm.removeTask(taskId);
 
-        assertTrue(fm.getTasks().isEmpty());
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
+
+        assertTrue(fbtm.getTasks().isEmpty());
     }
 
     @Test
     void testReadEmptyFile() {
 
-        FileBackedTaskManager.loadFromFile(f);
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
-        assertTrue(fm.getTasks().isEmpty());
-        assertTrue(fm.getSubtasks().isEmpty());
-        assertTrue(fm.getEpics().isEmpty());
-        assertTrue(fm.getHistory().isEmpty());
+        assertTrue(fbtm.getTasks().isEmpty());
+        assertTrue(fbtm.getSubtasks().isEmpty());
+        assertTrue(fbtm.getEpics().isEmpty());
+        assertTrue(fbtm.getHistory().isEmpty());
     }
 
 
@@ -78,12 +77,11 @@ class FileBackedTaskManagerTest {
         fm.createSubtask(subtask1);
         fm.createSubtask(subtask2);
 
-        FileBackedTaskManager.loadFromFile(f);
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
-
-        assertEquals(2, fm.getTasks().size());
-        assertEquals(1, fm.getEpics().size());
-        assertEquals(2, fm.getSubtasks().size());
+        assertEquals(2, fbtm.getTasks().size());
+        assertEquals(1, fbtm.getEpics().size());
+        assertEquals(2, fbtm.getSubtasks().size());
     }
 
     @Test
@@ -111,11 +109,39 @@ class FileBackedTaskManagerTest {
         fm.getSubtask(subtask1Id);
         fm.getTask(task2Id);
 
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
-        FileBackedTaskManager.loadFromFile(f);
-
-
-        assertEquals(6, fm.getHistory().size());
+        assertEquals(6, fbtm.getHistory().size());
     }
 
+    @Test
+    void testUpdateCountId() {
+
+        Task task1 = new Task("task 1", "desc for task1");
+        Task task2 = new Task("task 2", "desc for task2");
+        int task1Id = fm.createTask(task1);
+        int task2Id = fm.createTask(task2);
+
+        Epic epic1 = new Epic("epic 1", "desc for epic1");
+        Epic epic2 = new Epic("epic 2", "desc for epic2");
+        int epic1Id = fm.createEpic(epic1);
+        int epic2Id = fm.createEpic(epic2);
+
+        Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epic1Id);
+        Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epic1Id);
+        int subtask1Id = fm.createSubtask(subtask1);
+        int subtask2Id = fm.createSubtask(subtask2);
+
+        fm.getSubtask(subtask2Id);
+        fm.getEpic(epic1Id);
+        fm.getTask(task1Id);
+        fm.getEpic(epic2Id);
+        fm.getSubtask(subtask1Id);
+        fm.getTask(task2Id);
+
+        FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
+
+        assertEquals(7, fbtm.cntId);
+
+    }
 }
