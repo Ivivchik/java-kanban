@@ -18,7 +18,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() throws ManagerSaveException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8))) {
 
-            bw.write("id,name,description,status,epicId\n");
+            bw.write("id,type,name,description,status,epicId\n");
 
             writeTaskToCsv(bw, getTasks());
             writeTaskToCsv(bw, getEpics());
@@ -30,7 +30,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
         } catch (IOException e) {
-            throw new ManagerSaveException(e.getMessage());
+            throw new ManagerSaveException("При записи задач произошшла ошибка: " + e.getMessage());
         }
     }
 
@@ -124,7 +124,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             addHistoryTask(history, fm);
 
         } catch (IOException e) {
-            throw new ManagerSaveException(e.getMessage());
+            throw new ManagerSaveException("При чтении задач произошшла ошибка: " + e.getMessage());
         }
 
         return fm;
