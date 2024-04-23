@@ -20,11 +20,6 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "name='" + this.getName() + '\'' +
-                ", description='" + this.getDescription() + '\'' +
-                ", id=" + this.getId() +
-                ", status=" + this.getStatus() +
-                '}';
+        return super.toString() + epicId;
     }
 }

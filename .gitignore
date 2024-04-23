@@ -25,3 +25,9 @@ hs_err_pid*
 # Idea files
 .idea
 *.iml
+
+#Mac files
+.DS_Store
+
+#recources files
+/resources

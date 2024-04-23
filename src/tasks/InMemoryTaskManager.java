@@ -9,11 +9,11 @@ import java.util.ArrayList;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HistoryManager historyManager = Manager.getDefaultHistory();
-    private int cntId = 1;
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HistoryManager historyManager = Manager.getDefaultHistory();
+    protected int cntId = 1;
 
     @Override
     public List<Task> getHistory() {
@@ -110,7 +110,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeEpic(int id) {
         if (epics.containsKey(id)) {
-            ArrayList<Integer> subtasksId = epics.get(id).getSubtasks();
+            List<Integer> subtasksId = epics.get(id).getSubtasks();
             for (int subtaskId : subtasksId) {
                 subtasks.remove(subtaskId);
                 historyManager.remove(subtaskId);
@@ -248,7 +248,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void calculateEpicStatus(Epic epic) {
 
-        ArrayList<Integer> subtasksId = epic.getSubtasks();
+        List<Integer> subtasksId = epic.getSubtasks();
 
         if (subtasksId.isEmpty()) {
             epic.setStatus(Status.NEW);
