@@ -1,9 +1,12 @@
 package tasks;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
+
+    private Instant endTime;
 
     private ArrayList<Integer> subtasksId = new ArrayList<>();
 
@@ -17,6 +20,15 @@ public class Epic extends Task {
 
     protected Epic(int id, String name, String description, Status status) {
         super(id, name, description, status);
+    }
+
+    @Override
+    public Instant getEndTime() {
+        return this.endTime;
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
     }
 
     public void addSubtaskId(Integer subtaskId) {
