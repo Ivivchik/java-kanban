@@ -3,6 +3,8 @@ package tasks;
 import utils.Manager;
 import history.HistoryManager;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -65,6 +67,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epics.get(subtask.getEpicId());
             epic.addSubtaskId(cntId);
             calculateEpicStatus(epic);
+            calculateEpicDuration(epic);
 
             cntId++;
 
@@ -127,6 +130,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = epics.get(epicId);
             epic.removeSubtask(id);
             calculateEpicStatus(epic);
+            calculateEpicDuration(epic);
 
             subtasks.remove(id);
             historyManager.remove(id);
@@ -242,6 +246,7 @@ public class InMemoryTaskManager implements TaskManager {
 
                 Epic epic = epics.get(subtask.getEpicId());
                 calculateEpicStatus(epic);
+                calculateEpicDuration(epic);
             }
         }
     }
@@ -274,5 +279,32 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.IN_PROGRESS);
         }
+    }
+
+    private void calculateEpicDuration(Epic epic) {
+        List<Integer> subtasksId = epic.getSubtasks();
+        Instant startTime = Instant.MAX;
+        Instant endTime = Instant.MIN;
+        Duration duration = Duration.ZERO;
+
+        for (int subtaskId : subtasksId) {
+            Subtask subtask = subtasks.get(subtaskId);
+            Duration subtaskDuration = subtask.getDuration();
+            Instant subtaskStartTime = subtask.getStartTime();
+            Instant subtaskEndTime = subtask.getEndTime();
+
+            if (subtaskStartTime.isBefore(startTime)) {
+                startTime = subtaskStartTime;
+            }
+            if (subtaskEndTime.isAfter(endTime)) {
+                endTime = subtaskEndTime;
+            }
+            duration = duration.plus(subtaskDuration);
+        }
+
+        epic.setDuration(duration);
+        epic.setStartTime(startTime);
+        epic.setEndTime(endTime);
+
     }
 }
