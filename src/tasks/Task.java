@@ -3,6 +3,7 @@ package tasks;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     protected String name;
@@ -80,16 +81,16 @@ public class Task {
         return id;
     }
 
-    public Duration getDuration() {
-        return duration;
+    public Optional<Duration> getDuration() {
+        return Optional.ofNullable(duration);
     }
 
-    public Instant getStartTime() {
-        return startTime;
+    public Optional<Instant> getStartTime() {
+        return Optional.ofNullable(startTime);
     }
 
-    public Instant getEndTime() {
-        return startTime.plus(duration);
+    public Optional<Instant> getEndTime() {
+        return Optional.ofNullable(startTime).flatMap(st -> Optional.ofNullable(duration).map(st::plus));
     }
 
     @Override
@@ -114,6 +115,8 @@ public class Task {
                 this.getClass().getSimpleName() + "," +
                 name + "," +
                 description + "," +
-                status + ",";
+                status + "," +
+                (startTime != null ? startTime : "") + "," +
+                (duration != null ? duration.toMinutes() : "") + ",";
     }
 }
