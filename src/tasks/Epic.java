@@ -3,6 +3,7 @@ package tasks;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Epic extends Task {
 
@@ -23,8 +24,8 @@ public class Epic extends Task {
     }
 
     @Override
-    public Instant getEndTime() {
-        return this.endTime;
+    public Optional<Instant> getEndTime() {
+        return Optional.ofNullable(this.endTime);
     }
 
     public void setEndTime(Instant endTime) {
