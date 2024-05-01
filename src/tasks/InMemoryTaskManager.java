@@ -39,8 +39,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int createTask(Task task) {
+        Optional<Duration> d = task.getDuration().filter(Duration::isNegative);
         Optional<Task> invalidTask = getPrioritizedTasks().stream().filter(t -> isIntersect(t, task)).findFirst();
-        if (invalidTask.isPresent()) {
+        if (invalidTask.isPresent() || d.isPresent()) {
             return -1;
         }
         task.setId(cntId);
@@ -53,8 +54,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int createEpic(Epic epic) {
+        Optional<Duration> d = epic.getDuration().filter(Duration::isNegative);
         Optional<Task> invalidEpic = getPrioritizedTasks().stream().filter(t -> isIntersect(t, epic)).findFirst();
-        if (invalidEpic.isPresent()) {
+        if (invalidEpic.isPresent() || d.isPresent()) {
             return -1;
         }
         epic.setId(cntId);
@@ -68,8 +70,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createSubtask(Subtask subtask) {
         if (epics.containsKey(subtask.getEpicId())) {
+            Optional<Duration> d = subtask.getDuration().filter(Duration::isNegative);
             Optional<Task> invalidSubtask = getPrioritizedTasks().stream().filter(t -> isIntersect(t, subtask)).findFirst();
-            if (invalidSubtask.isPresent()) {
+            if (invalidSubtask.isPresent() || d.isPresent()) {
                 return -1;
             }
 
@@ -336,7 +339,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private boolean isIntersect(Task task, Task otherTask) {
+    public boolean isIntersect(Task task, Task otherTask) {
 
         Optional<Instant> taskST = task.getStartTime();
         Optional<Instant> taskET = task.getEndTime();
