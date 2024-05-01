@@ -1,40 +1,32 @@
 package tasks;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Manager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     private File f;
-    private FileBackedTaskManager fm;
 
-    private int[] fromListToArray(List<Task> arr) {
-        int[] res = new int[arr.size()];
-        for (int i = 0; i < arr.size(); i++) {
-            res[i] = arr.get(i).getId();
+    @Override
+    protected FileBackedTaskManager createTaskManager() {
+        try {
+            f = File.createTempFile("test", "fileBackedManager");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return res;
-    }
-
-    @BeforeEach
-    void init() throws IOException {
-        f = File.createTempFile("test", "fileBackedManager");
-        fm = Manager.getFileTaskManager(f);
+        return Manager.getFileTaskManager(f);
     }
 
     @Test
     void testLoadTaskToFile() {
 
         Task task = new Task("task", "desc for task");
-        int taskId = fm.createTask(task);
+        int taskId = taskManager.createTask(task);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
@@ -48,8 +40,8 @@ class FileBackedTaskManagerTest {
     void testRemoveFromFile() {
 
         Task task = new Task("task", "desc for task");
-        int taskId = fm.createTask(task);
-        fm.removeTask(taskId);
+        int taskId = taskManager.createTask(task);
+        taskManager.removeTask(taskId);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
@@ -74,18 +66,18 @@ class FileBackedTaskManagerTest {
         Task task1 = new Task("task 1", "desc for task1");
         Task task2 = new Task("task 2", "desc for task2");
 
-        fm.createTask(task1);
-        fm.createTask(task2);
+        taskManager.createTask(task1);
+        taskManager.createTask(task2);
 
         Epic epic = new Epic("epic 1", "desc for epic");
 
-        int epicId = fm.createEpic(epic);
+        int epicId = taskManager.createEpic(epic);
 
         Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epicId);
         Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epicId);
 
-        fm.createSubtask(subtask1);
-        fm.createSubtask(subtask2);
+        taskManager.createSubtask(subtask1);
+        taskManager.createSubtask(subtask2);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
@@ -99,25 +91,25 @@ class FileBackedTaskManagerTest {
 
         Task task1 = new Task("task 1", "desc for task1");
         Task task2 = new Task("task 2", "desc for task2");
-        int task1Id = fm.createTask(task1);
-        int task2Id = fm.createTask(task2);
+        int task1Id = taskManager.createTask(task1);
+        int task2Id = taskManager.createTask(task2);
 
         Epic epic1 = new Epic("epic 1", "desc for epic1");
         Epic epic2 = new Epic("epic 2", "desc for epic2");
-        int epic1Id = fm.createEpic(epic1);
-        int epic2Id = fm.createEpic(epic2);
+        int epic1Id = taskManager.createEpic(epic1);
+        int epic2Id = taskManager.createEpic(epic2);
 
         Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epic1Id);
         Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epic1Id);
-        int subtask1Id = fm.createSubtask(subtask1);
-        int subtask2Id = fm.createSubtask(subtask2);
+        int subtask1Id = taskManager.createSubtask(subtask1);
+        int subtask2Id = taskManager.createSubtask(subtask2);
 
-        fm.getSubtask(subtask2Id);
-        fm.getEpic(epic1Id);
-        fm.getTask(task1Id);
-        fm.getEpic(epic2Id);
-        fm.getSubtask(subtask1Id);
-        fm.getTask(task2Id);
+        taskManager.getSubtask(subtask2Id);
+        taskManager.getEpic(epic1Id);
+        taskManager.getTask(task1Id);
+        taskManager.getEpic(epic2Id);
+        taskManager.getSubtask(subtask1Id);
+        taskManager.getTask(task2Id);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
@@ -129,25 +121,25 @@ class FileBackedTaskManagerTest {
 
         Task task1 = new Task("task 1", "desc for task1");
         Task task2 = new Task("task 2", "desc for task2");
-        int task1Id = fm.createTask(task1);
-        int task2Id = fm.createTask(task2);
+        int task1Id = taskManager.createTask(task1);
+        int task2Id = taskManager.createTask(task2);
 
         Epic epic1 = new Epic("epic 1", "desc for epic1");
         Epic epic2 = new Epic("epic 2", "desc for epic2");
-        int epic1Id = fm.createEpic(epic1);
-        int epic2Id = fm.createEpic(epic2);
+        int epic1Id = taskManager.createEpic(epic1);
+        int epic2Id = taskManager.createEpic(epic2);
 
         Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epic1Id);
         Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epic1Id);
-        int subtask1Id = fm.createSubtask(subtask1);
-        int subtask2Id = fm.createSubtask(subtask2);
+        int subtask1Id = taskManager.createSubtask(subtask1);
+        int subtask2Id = taskManager.createSubtask(subtask2);
 
-        fm.getSubtask(subtask2Id);
-        fm.getEpic(epic1Id);
-        fm.getTask(task1Id);
-        fm.getEpic(epic2Id);
-        fm.getSubtask(subtask1Id);
-        fm.getTask(task2Id);
+        taskManager.getSubtask(subtask2Id);
+        taskManager.getEpic(epic1Id);
+        taskManager.getTask(task1Id);
+        taskManager.getEpic(epic2Id);
+        taskManager.getSubtask(subtask1Id);
+        taskManager.getTask(task2Id);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
@@ -160,18 +152,18 @@ class FileBackedTaskManagerTest {
 
         Epic epic1 = new Epic("epic 1", "desc for epic1");
         Epic epic2 = new Epic("epic 2", "desc for epic2");
-        int epic1Id = fm.createEpic(epic1);
-        int epic2Id = fm.createEpic(epic2);
+        int epic1Id = taskManager.createEpic(epic1);
+        int epic2Id = taskManager.createEpic(epic2);
 
         Subtask subtask1 = new Subtask("subtask1", "desc for subtask1", epic1Id);
         Subtask subtask2 = new Subtask("subtask2", "desc for subtask2", epic1Id);
-        int subtask1Id = fm.createSubtask(subtask1);
-        int subtask2Id = fm.createSubtask(subtask2);
+        int subtask1Id = taskManager.createSubtask(subtask1);
+        int subtask2Id = taskManager.createSubtask(subtask2);
 
         FileBackedTaskManager fbtm = FileBackedTaskManager.loadFromFile(f);
 
-        Integer [] subtasksIdEtalon = {subtask1Id, subtask2Id};
-        Integer [] subtasksIdFromFile = {};
+        Integer[] subtasksIdEtalon = {subtask1Id, subtask2Id};
+        Integer[] subtasksIdFromFile = {};
         subtasksIdFromFile = fbtm.getEpic(epic1Id).getSubtasks().toArray(subtasksIdFromFile);
 
         assertTrue(fbtm.getEpic(epic2Id).getSubtasks().isEmpty());
