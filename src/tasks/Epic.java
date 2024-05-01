@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,10 @@ public class Epic extends Task {
 
     protected Epic(int id, String name, String description, Status status) {
         super(id, name, description, status);
+    }
+
+    protected Epic(int id, String name, String description, Status status, Instant startTime, Duration duration) {
+        super(id, name, description, status, startTime, duration);
     }
 
     @Override
