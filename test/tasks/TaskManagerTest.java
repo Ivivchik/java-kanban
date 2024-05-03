@@ -64,11 +64,18 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task newTaskIncorrectDuration = new Task(taskId, "broken duration task name",
                 "broken duration description", Status.DONE,
                 Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(-1));
+        Task newTaskWithStartTime = new Task(taskId, "new task name with start time",
+                "new task description with start time", Status.DONE,
+                Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(60));
+
+        Task newTaskWithStartTimeUpdated = new Task(taskId, "new task name with start time updated",
+                "new task description with start time updated", Status.IN_PROGRESS,
+                Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(100));
 
         taskManager.updateTask(newTask);
 
         Task updatedTask = taskManager.getTask(taskId);
-        assertEquals(task, updatedTask);
+        assertEquals(newTask, updatedTask);
 
         taskManager.updateTask(newTaskIncorrectId);
         updatedTask = taskManager.getTask(taskId);
@@ -77,6 +84,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateTask(newTaskIncorrectDuration);
         updatedTask = taskManager.getTask(taskId);
         assertEquals(task, updatedTask);
+
+        taskManager.updateTask(newTaskWithStartTime);
+        updatedTask = taskManager.getTask(taskId);
+        assertEquals(newTaskWithStartTime, updatedTask);
+
+        taskManager.updateTask(newTaskWithStartTimeUpdated);
+        updatedTask = taskManager.getTask(taskId);
+        assertEquals(newTaskWithStartTimeUpdated, updatedTask);
     }
 
     @Test
