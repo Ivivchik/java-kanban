@@ -351,7 +351,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean checkTaskTime(Task task) {
         Optional<Duration> durationOpt = task.getDuration().filter(Duration::isNegative);
-        Optional<Task> invalidTaskOpt = prioritizedTasks.stream().filter(t -> isIntersect(task, t)).findFirst();
+        Optional<Task> invalidTaskOpt = prioritizedTasks.stream().filter(t -> isIntersect(t, task)).findFirst();
 
         return durationOpt.isEmpty() && invalidTaskOpt.isEmpty();
     }
