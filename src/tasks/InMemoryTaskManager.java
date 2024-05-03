@@ -6,7 +6,6 @@ import history.HistoryManager;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
