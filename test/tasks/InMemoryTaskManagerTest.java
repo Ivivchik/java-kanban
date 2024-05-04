@@ -52,30 +52,42 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         Task task2 = new Task("Task2", "Task 2 Description",
                 Instant.parse("2022-01-01T11:00:00Z"), Duration.ofMinutes(5));
         assertFalse(taskManager.isIntersect(task1, task2));
+        assertFalse(taskManager.isIntersect(task2, task1));
 
         Task task3 = new Task("Task3", "Task 3 Description",
                 Instant.parse("2022-01-01T12:00:00Z"), Duration.ofMinutes(60));
         Task task4 = new Task("Task4", "Task 4 Description",
                 Instant.parse("2022-01-01T11:30:00Z"), Duration.ofMinutes(60));
         assertTrue(taskManager.isIntersect(task3, task4));
+        assertTrue(taskManager.isIntersect(task4, task3));
 
         Task task5 = new Task("Task5", "Task 5 Description",
                 Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(60));
         Task task6 = new Task("Task6", "Task 6 Description",
                 Instant.parse("2022-01-01T14:30:00Z"), Duration.ofMinutes(60));
         assertTrue(taskManager.isIntersect(task5, task6));
+        assertTrue(taskManager.isIntersect(task6, task5));
 
         Task task7 = new Task("Task7", "Task 7 Description",
                 Instant.parse("2022-01-01T16:00:00Z"), Duration.ofMinutes(60));
         Task task8 = new Task("Task8", "Task 8 Description",
                 Instant.parse("2022-01-01T19:00:00Z"), Duration.ofMinutes(90));
         assertFalse(taskManager.isIntersect(task7, task8));
+        assertFalse(taskManager.isIntersect(task8, task7));
 
         Task task9 = new Task("Task9", "Task 9 Description",
-                Instant.parse("2022-01-01T22:00:00Z"), Duration.ofMinutes(0));
-        Task task10 = new Task("Task10", "Task 10 Description",
                 Instant.parse("2022-01-01T22:00:00Z"), Duration.ofMinutes(60));
-        assertFalse(taskManager.isIntersect(task9, task10));
+        Task task10 = new Task("Task10", "Task 10 Description",
+                Instant.parse("2022-01-01T21:00:00Z"), Duration.ofMinutes(120));
+        assertTrue(taskManager.isIntersect(task9, task10));
+        assertTrue(taskManager.isIntersect(task10, task9));
+
+        Task task11 = new Task("Task11", "Task 11 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
+        Task task12 = new Task("Task12", "Task 12 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
+        assertTrue(taskManager.isIntersect(task11, task12));
+        assertTrue(taskManager.isIntersect(task12, task11));
     }
 
     @Test
