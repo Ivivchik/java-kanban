@@ -220,7 +220,10 @@ public class InMemoryTaskManager implements TaskManager {
                 task.setStatus(status);
             }
             duration.ifPresent(task::setDuration);
-            startTime.ifPresent(task::setStartTime);
+            startTime.ifPresent(i -> {
+                task.setStartTime(i);
+                prioritizedTasks.add(task);
+            });
         }
     }
 
@@ -266,7 +269,10 @@ public class InMemoryTaskManager implements TaskManager {
                     subtask.setStatus(status);
                 }
                 duration.ifPresent(subtask::setDuration);
-                startTime.ifPresent(subtask::setStartTime);
+                startTime.ifPresent(i -> {
+                    subtask.setStartTime(i);
+                    prioritizedTasks.add(subtask);
+                });
 
                 Epic epic = epics.get(subtask.getEpicId());
                 calculateEpicStatus(epic);
@@ -339,19 +345,24 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Instant> otherST = otherTask.getStartTime();
         Optional<Instant> otherET = otherTask.getEndTime();
 
-        Optional<Boolean> startBeforeEnd = otherST.flatMap(
-                ost -> taskST.map(ost::isAfter).flatMap(res1 -> taskET.map(ost::isBefore).map(res2 -> res1 && res2)));
-        Optional<Boolean> endAfterStart = otherET.flatMap(
-                oet -> taskST.map(oet::isAfter).flatMap(res1 -> taskET.map(oet::isBefore).map(res2 -> res1 && res2)));
+        if (taskST.isPresent() && taskET.isPresent() && otherST.isPresent() && otherET.isPresent()) {
+            boolean startBeforeEnd = (otherST.get().isAfter(taskST.get()) || otherST.get().equals(taskST.get())) &&
+                    otherST.get().isBefore(taskET.get());
+            boolean endAfterStart = otherET.get().isAfter(taskST.get()) &&
+                    (otherET.get().isBefore(taskET.get()) || otherET.get().equals(taskET.get()));
 
-        Optional<Boolean> result = startBeforeEnd.flatMap(sbe -> endAfterStart.map(eaf -> sbe || eaf));
-
-        return result.orElse(false);
+            return startBeforeEnd || endAfterStart;
+        } else {
+            return false;
+        }
     }
 
     private boolean checkTaskTime(Task task) {
         Optional<Duration> durationOpt = task.getDuration().filter(Duration::isNegative);
-        Optional<Task> invalidTaskOpt = prioritizedTasks.stream().filter(t -> isIntersect(t, task)).findFirst();
+        Optional<Task> invalidTaskOpt = prioritizedTasks.stream()
+                .filter(t -> t.getId() != task.getId())
+                .filter(t -> isIntersect(t, task))
+                .findFirst();
 
         return durationOpt.isEmpty() && invalidTaskOpt.isEmpty();
     }
