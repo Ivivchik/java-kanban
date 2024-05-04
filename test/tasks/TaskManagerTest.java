@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -191,5 +194,56 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(taskManager.getEpic(epic2Id).getSubtasks().isEmpty());
     }
 
+    @Test
+    void getPrioritizedTasksTest() {
+        Task task1 = new Task("Task1", "Task 1 Description",
+                Instant.parse("2022-01-01T10:00:00Z"), Duration.ofMinutes(60));
+        Task task2 = new Task("Task2", "Task 2 Description",
+                Instant.parse("2022-01-01T11:00:00Z"), Duration.ofMinutes(360));
+        Task task3 = new Task("Task3", "Task 3 Description",
+                Instant.parse("2022-01-01T12:00:00Z"), Duration.ofMinutes(60));
+        Task task4 = new Task("Task4", "Task 4 Description",
+                Instant.parse("2022-01-01T11:30:00Z"), Duration.ofMinutes(60));
+        Task task5 = new Task("Task5", "Task 5 Description",
+                Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(60));
+        Task task6 = new Task("Task6", "Task 6 Description",
+                Instant.parse("2022-01-01T14:30:00Z"), Duration.ofMinutes(60));
+        Task task7 = new Task("Task7", "Task 7 Description",
+                Instant.parse("2022-01-01T16:00:00Z"), Duration.ofMinutes(60));
+        Task task8 = new Task("Task8", "Task 8 Description",
+                Instant.parse("2022-01-01T19:00:00Z"), Duration.ofMinutes(90));
+        Task task9 = new Task("Task9", "Task 9 Description",
+                Instant.parse("2022-01-01T22:00:00Z"), Duration.ofMinutes(60));
+        Task task10 = new Task("Task10", "Task 10 Description",
+                Instant.parse("2022-01-01T21:00:00Z"), Duration.ofMinutes(120));
+        Task task11 = new Task("Task11", "Task 11 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
+        Task task12 = new Task("Task12", "Task 12 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
 
+        Task task13 = new Task("task name", "task description");
+
+        taskManager.createTask(task1);
+        taskManager.createTask(task2);
+        taskManager.createTask(task3);
+        taskManager.createTask(task4);
+        taskManager.createTask(task5);
+        taskManager.createTask(task6);
+        taskManager.createTask(task7);
+        taskManager.createTask(task13);
+        taskManager.createTask(task8);
+        taskManager.createTask(task9);
+        taskManager.createTask(task10);
+        taskManager.createTask(task11);
+        taskManager.createTask(task12);
+
+        SortedSet<Task> etalon = new TreeSet<>(Comparator.comparing(t -> t.getStartTime().orElseThrow()));
+        etalon.add(task1);
+        etalon.add(task2);
+        etalon.add(task8);
+        etalon.add(task9);
+        etalon.add(task11);
+
+        assertEquals(etalon, taskManager.getPrioritizedTasks());
+    }
 }
