@@ -1,7 +1,6 @@
 package utils;
 
 import tasks.FileBackedTaskManager;
-import tasks.TaskManager;
 import history.HistoryManager;
 import tasks.InMemoryTaskManager;
 import history.InMemoryHistoryManager;
@@ -10,7 +9,7 @@ import java.io.File;
 
 public class Manager {
 
-    public static TaskManager getDefault() {
+    public static InMemoryTaskManager getDefault() {
         return new InMemoryTaskManager();
     }
 

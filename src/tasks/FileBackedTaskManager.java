@@ -1,6 +1,8 @@
 package tasks;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +20,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void save() throws ManagerSaveException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path, StandardCharsets.UTF_8))) {
 
-            bw.write("id,type,name,description,status,epicId\n");
+            bw.write("id,type,name,description,status,startTime,duration,epicId\n");
 
             writeTaskToCsv(bw, getTasks());
             writeTaskToCsv(bw, getEpics());
@@ -53,13 +55,31 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String[] strArr = value.split(",");
 
         String type = strArr[1];
+        int id = Integer.parseInt(strArr[0]);
+        String name = strArr[2];
+        String description = strArr[3];
+        Status status = statusFromString(strArr[4]);
+        Instant startTime = null;
+        Duration duration = null;
+
+        if (strArr.length > 5) {
+            String st = strArr[5];
+            String d = strArr[6];
+            if (!st.isEmpty()) {
+                startTime = Instant.parse(st);
+            }
+            if (!d.isEmpty()) {
+                duration = Duration.ofMinutes(Long.parseLong(d));
+            }
+        }
+
         switch (type) {
             case "Task":
-                return new Task(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]));
+                return new Task(id, name, description, status, startTime, duration);
             case "Epic":
-                return new Epic(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]));
+                return new Epic(id, name, description, status, startTime, duration);
             case "Subtask":
-                return new Subtask(Integer.parseInt(strArr[0]), strArr[2], strArr[3], statusFromString(strArr[4]), Integer.parseInt(strArr[5]));
+                return new Subtask(id, name, description, status, startTime, duration, Integer.parseInt(strArr[7]));
             default:
                 return null;
         }

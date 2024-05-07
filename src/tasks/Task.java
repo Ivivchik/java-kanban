@@ -1,12 +1,17 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     protected String name;
     protected String description;
     protected int id;
     protected Status status;
+    protected Duration duration;
+    protected Instant startTime;
 
     public Task(String name, String description) {
         this.name = name;
@@ -21,11 +26,29 @@ public class Task {
         this.status = status;
     }
 
+    public Task(int id, String name, String description, Status status, Instant startTime, Duration duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
     public Task(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
     }
+
+    public Task(String name, String description, Instant startTime, Duration duration) {
+        this.name = name;
+        this.description = description;
+        this.duration = duration;
+        this.startTime = startTime;
+        this.status = Status.NEW;
+    }
+
 
     public void setName(String name) {
         this.name = name;
@@ -43,6 +66,14 @@ public class Task {
         this.status = status;
     }
 
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+    }
+
     public String getName() {
         return name;
     }
@@ -57,6 +88,18 @@ public class Task {
 
     public int getId() {
         return id;
+    }
+
+    public Optional<Duration> getDuration() {
+        return Optional.ofNullable(duration);
+    }
+
+    public Optional<Instant> getStartTime() {
+        return Optional.ofNullable(startTime);
+    }
+
+    public Optional<Instant> getEndTime() {
+        return Optional.ofNullable(startTime).flatMap(st -> Optional.ofNullable(duration).map(st::plus));
     }
 
     @Override
@@ -81,6 +124,8 @@ public class Task {
                 this.getClass().getSimpleName() + "," +
                 name + "," +
                 description + "," +
-                status + ",";
+                status + "," +
+                (startTime != null ? startTime : "") + "," +
+                (duration != null ? duration.toMinutes() : "") + ",";
     }
 }

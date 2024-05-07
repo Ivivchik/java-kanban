@@ -1,6 +1,7 @@
 package tasks;
 
 import java.util.List;
+import java.util.SortedSet;
 
 public interface TaskManager {
     List<Epic> getEpics();
@@ -42,4 +43,6 @@ public interface TaskManager {
     void updateSubtask(Subtask newSubtask);
 
     List<Task> getHistory();
+
+    SortedSet<Task> getPrioritizedTasks();
 }

@@ -6,96 +6,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import utils.Manager;
 
-class InMemoryTaskManagerTest {
+import java.time.Duration;
+import java.time.Instant;
 
-    private TaskManager taskManager;
-
-    @BeforeEach
-    void setUp() {
-        taskManager = Manager.getDefault();
-        assertNotNull(taskManager);
+class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+    @Override
+    protected InMemoryTaskManager createTaskManager() {
+        return Manager.getDefault();
     }
 
     @Test
-    void createTask() {
-        Task task = new Task(89, "task name", "task description");
-        int taskId = taskManager.createTask(task);
-
-        Task savedTask = taskManager.getTask(taskId);
-
-        assertNotNull(savedTask);
-        assertEquals(task, savedTask);
-    }
-
-    @Test
-    void createEpic() {
-        Epic epic = new Epic(2, "epic name", "epic description");
-        int epicId = taskManager.createEpic(epic);
-
-        Epic savedEpic = taskManager.getEpic(epicId);
-        System.out.println(epicId);
-
-        assertNotNull(savedEpic);
-        assertEquals(epic, savedEpic);
-    }
-
-    @Test
-    void createSubtask() {
-        Epic epic = new Epic("epic name", "epic description");
-        int epicId = taskManager.createEpic(epic);
-        Subtask subtask = new Subtask(10, "subtask name", "subtask description", Status.NEW, epicId);
-        int subtaskId = taskManager.createSubtask(subtask);
-
-        Subtask savedSubtask = taskManager.getSubtask(subtaskId);
-
-        assertNotNull(savedSubtask);
-        assertEquals(subtask, savedSubtask);
-    }
-
-    @Test
-    void updateTask() {
-        Task task = new Task(89, "task name", "task description");
-        int taskId = taskManager.createTask(task);
-        Task newTask = new Task(taskId, "new task name", "new task description", Status.DONE);
-        Task newTaskIncorrectId = new Task(5, "broken task name", "broken description", Status.DONE);
-
-        taskManager.updateTask(newTask);
-
-        Task updatedTask = taskManager.getTask(taskId);
-        assertEquals(task, updatedTask);
-
-        taskManager.updateTask(newTaskIncorrectId);
-        updatedTask = taskManager.getTask(taskId);
-        assertEquals(task, updatedTask);
-    }
-
-    @Test
-    void updateEpic() {
-        Epic epic = new Epic("epic name", "epic description");
-        int epicId = taskManager.createEpic(epic);
-        Epic newEpic = new Epic(epicId, "new epic name", "new epic description");
-
-        taskManager.updateEpic(newEpic);
-
-        Epic updatedEpic = taskManager.getEpic(epicId);
-        assertEquals(epic, updatedEpic);
-    }
-
-    @Test
-    void updateSubtask() {
-        Epic epic = new Epic("epic name", "epic description");
-        int epicId = taskManager.createEpic(epic);
-        Subtask subtask = new Subtask("subtask name", "subtask description", epicId);
-        int subtaskId = taskManager.createSubtask(subtask);
-        Subtask newSubtask = new Subtask(subtaskId, "subtask name", "subtask description", Status.IN_PROGRESS, epicId);
-        taskManager.updateSubtask(newSubtask);
-
-        Subtask updatedSubtask = taskManager.getSubtask(subtaskId);
-        assertEquals(subtask, updatedSubtask);
-    }
-
-    @Test
-    void addToHistory() {
+    void addToHistoryTest() {
         Task task = new Task(1, "task name", "task description", Status.NEW);
         int taskId = taskManager.createTask(task);
         taskManager.getTask(1);
@@ -109,7 +30,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void calculateStatusEpic() {
+    void calculateStatusEpicTest() {
         Epic epic = new Epic("epic name", "epic description");
         int epicId = taskManager.createEpic(epic);
         Subtask subtask = new Subtask("subtask name", "subtask description", epicId);
@@ -117,9 +38,74 @@ class InMemoryTaskManagerTest {
 
         assertEquals(Status.NEW, epic.getStatus());
 
-        Subtask newSubtask = new Subtask(subtaskId, "subtask name", "subtask description", Status.IN_PROGRESS, epicId);
+        Subtask newSubtask = new Subtask(subtaskId, "subtask name", "subtask description",
+                Status.IN_PROGRESS, epicId);
         taskManager.updateSubtask(newSubtask);
 
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
+    }
+
+    @Test
+    void isIntersectTest() {
+        Task task1 = new Task("Task1", "Task 1 Description",
+                Instant.parse("2022-01-01T10:00:00Z"), Duration.ofMinutes(60));
+        Task task2 = new Task("Task2", "Task 2 Description",
+                Instant.parse("2022-01-01T11:00:00Z"), Duration.ofMinutes(5));
+        assertFalse(taskManager.isIntersect(task1, task2));
+        assertFalse(taskManager.isIntersect(task2, task1));
+
+        Task task3 = new Task("Task3", "Task 3 Description",
+                Instant.parse("2022-01-01T12:00:00Z"), Duration.ofMinutes(60));
+        Task task4 = new Task("Task4", "Task 4 Description",
+                Instant.parse("2022-01-01T11:30:00Z"), Duration.ofMinutes(60));
+        assertTrue(taskManager.isIntersect(task3, task4));
+        assertTrue(taskManager.isIntersect(task4, task3));
+
+        Task task5 = new Task("Task5", "Task 5 Description",
+                Instant.parse("2022-01-01T14:00:00Z"), Duration.ofMinutes(60));
+        Task task6 = new Task("Task6", "Task 6 Description",
+                Instant.parse("2022-01-01T14:30:00Z"), Duration.ofMinutes(60));
+        assertTrue(taskManager.isIntersect(task5, task6));
+        assertTrue(taskManager.isIntersect(task6, task5));
+
+        Task task7 = new Task("Task7", "Task 7 Description",
+                Instant.parse("2022-01-01T16:00:00Z"), Duration.ofMinutes(60));
+        Task task8 = new Task("Task8", "Task 8 Description",
+                Instant.parse("2022-01-01T19:00:00Z"), Duration.ofMinutes(90));
+        assertFalse(taskManager.isIntersect(task7, task8));
+        assertFalse(taskManager.isIntersect(task8, task7));
+
+        Task task9 = new Task("Task9", "Task 9 Description",
+                Instant.parse("2022-01-01T22:00:00Z"), Duration.ofMinutes(60));
+        Task task10 = new Task("Task10", "Task 10 Description",
+                Instant.parse("2022-01-01T21:00:00Z"), Duration.ofMinutes(120));
+        assertTrue(taskManager.isIntersect(task9, task10));
+        assertTrue(taskManager.isIntersect(task10, task9));
+
+        Task task11 = new Task("Task11", "Task 11 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
+        Task task12 = new Task("Task12", "Task 12 Description",
+                Instant.parse("2022-01-01T23:00:00Z"), Duration.ofMinutes(60));
+        assertTrue(taskManager.isIntersect(task11, task12));
+        assertTrue(taskManager.isIntersect(task12, task11));
+    }
+
+    @Test
+    void calculateDurationEpicTest() {
+        Epic epic = new Epic("epic name", "epic description");
+        int epicId = taskManager.createEpic(epic);
+        Subtask subtask1 = new Subtask(24, "subtask1 name", "subtask1 description",
+                Status.IN_PROGRESS, Instant.parse("2022-01-01T22:00:00Z"), Duration.ofMinutes(5), epicId);
+        taskManager.createSubtask(subtask1);
+        Subtask subtask2 = new Subtask(30, "subtask2 name", "subtask3 description",
+                Status.IN_PROGRESS, Instant.parse("2022-01-01T13:00:00Z"), Duration.ofMinutes(30), epicId);
+        taskManager.createSubtask(subtask2);
+        Subtask subtask3 = new Subtask(67, "subtask2 name", "subtask4 description",
+                Status.IN_PROGRESS, Instant.parse("2022-01-01T09:00:00Z"), Duration.ofMinutes(80), epicId);
+        taskManager.createSubtask(subtask3);
+
+        assertEquals(115, epic.getDuration().get().toMinutes());
+        assertEquals(Instant.parse("2022-01-01T09:00:00Z"), epic.getStartTime().get());
+        assertEquals(Instant.parse("2022-01-01T22:05:00Z"), epic.getEndTime().get());
     }
 }
