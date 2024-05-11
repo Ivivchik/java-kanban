@@ -22,11 +22,11 @@ public class HttpTaskServer<T extends TaskManager> {
     public void start() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
 
-        httpServer.createContext("/tasks", new TaskHttpHandler<>(taskManager));
-        httpServer.createContext("/subtasks", new SubtaskHttpHandler<>(taskManager));
-        httpServer.createContext("/epics", new EpicHttpHandler<>(taskManager));
-        httpServer.createContext("/history", new HistoryHttpHandler<>(taskManager));
-        httpServer.createContext("/prioritized", new PrioritizedTasksHttpHandler<>(taskManager));
+        httpServer.createContext("/tasks", new HttpTasksHandler<>(taskManager));
+        httpServer.createContext("/subtasks", new HttpSubtasksHandler<>(taskManager));
+        httpServer.createContext("/epics", new HttpEpicsHandler<>(taskManager));
+        httpServer.createContext("/history", new HttpHistoryHandler<>(taskManager));
+        httpServer.createContext("/prioritized", new HttpPrioritizedTasksHandler<>(taskManager));
 
         httpServer.start();
     }
