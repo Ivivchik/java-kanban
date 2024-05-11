@@ -1,5 +1,8 @@
 package tasks;
 
+import utils.exceptions.TaskHasInteractionException;
+import utils.exceptions.TaskNotFoundException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -80,13 +83,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task updatedTask = taskManager.getTask(taskId);
         assertEquals(newTask, updatedTask);
 
-        taskManager.updateTask(newTaskIncorrectId);
-        updatedTask = taskManager.getTask(taskId);
-        assertEquals(task, updatedTask);
+        assertThrows(TaskNotFoundException.class, () -> taskManager.updateTask(newTaskIncorrectId));
 
-        taskManager.updateTask(newTaskIncorrectDuration);
-        updatedTask = taskManager.getTask(taskId);
-        assertEquals(task, updatedTask);
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.updateTask(newTaskIncorrectDuration));
 
         taskManager.updateTask(newTaskWithStartTime);
         updatedTask = taskManager.getTask(taskId);
@@ -225,17 +224,17 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.createTask(task1);
         taskManager.createTask(task2);
-        taskManager.createTask(task3);
-        taskManager.createTask(task4);
-        taskManager.createTask(task5);
-        taskManager.createTask(task6);
-        taskManager.createTask(task7);
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task3));
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task4));
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task5));
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task6));
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task7));
         taskManager.createTask(task13);
         taskManager.createTask(task8);
         taskManager.createTask(task9);
-        taskManager.createTask(task10);
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task10));
         taskManager.createTask(task11);
-        taskManager.createTask(task12);
+        assertThrows(TaskHasInteractionException.class, () -> taskManager.createTask(task12));
 
         SortedSet<Task> etalon = new TreeSet<>(Comparator.comparing(t -> t.getStartTime().orElseThrow()));
         etalon.add(task1);
