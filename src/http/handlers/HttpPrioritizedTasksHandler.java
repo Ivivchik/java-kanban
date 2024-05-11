@@ -1,5 +1,6 @@
 package http.handlers;
 
+import com.google.gson.Gson;
 import tasks.Task;
 import tasks.TaskManager;
 
@@ -10,8 +11,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 public class HttpPrioritizedTasksHandler<M extends TaskManager> extends BaseHttpTaskHandler<M, Task> {
-    public HttpPrioritizedTasksHandler(M taskManager) {
-        super(taskManager, "prioritized", Task.class);
+    public HttpPrioritizedTasksHandler(M taskManager, Gson gson) {
+        super(taskManager, "prioritized", Task.class, gson);
     }
 
     @Override

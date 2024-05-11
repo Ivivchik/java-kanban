@@ -1,5 +1,7 @@
 package http.handlers;
 
+import com.google.gson.Gson;
+import utils.exceptions.ManagerSaveException;
 import utils.exceptions.TaskNotFoundException;
 import utils.exceptions.TaskHasInteractionException;
 import utils.exceptions.EpicIllegalArgumentException;
@@ -18,8 +20,8 @@ import java.util.Optional;
 
 public class HttpEpicsHandler<M extends TaskManager> extends BaseHttpTaskHandler<M, Epic> {
 
-    public HttpEpicsHandler(M taskManager) {
-        super(taskManager, "epics", Epic.class);
+    public HttpEpicsHandler(M taskManager, Gson gson) {
+        super(taskManager, "epics", Epic.class, gson);
     }
 
     @Override
@@ -51,6 +53,8 @@ public class HttpEpicsHandler<M extends TaskManager> extends BaseHttpTaskHandler
             writeResponse(exchange, e.getMessage(), 404);
         } catch (TaskHasInteractionException | EpicIllegalArgumentException e) {
             writeResponse(exchange, e.getMessage(), 406);
+        } catch (ManagerSaveException e) {
+            writeResponse(exchange, e.getMessage(), 500);
         }
     }
 

@@ -1,5 +1,6 @@
 package http.handlers;
 
+import com.google.gson.Gson;
 import tasks.Task;
 import tasks.TaskManager;
 
@@ -10,8 +11,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 public class HttpHistoryHandler<M extends TaskManager> extends BaseHttpTaskHandler<M, Task> {
-    public HttpHistoryHandler(M taskManager) {
-        super(taskManager, "history", Task.class);
+    public HttpHistoryHandler(M taskManager, Gson gson) {
+        super(taskManager, "history", Task.class, gson);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package http.handlers;
 
-import utils.adapters.InstantAdapter;
-import utils.adapters.DurationAdapter;
 import utils.exceptions.TaskNotFoundException;
 import utils.exceptions.TaskHasInteractionException;
 
@@ -11,7 +9,6 @@ import tasks.TaskManager;
 import http.Endpoint;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -20,8 +17,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -36,15 +31,11 @@ abstract class BaseHttpTaskHandler<M extends TaskManager, T extends Task> implem
     protected Gson gson;
     protected M taskManager;
 
-    protected BaseHttpTaskHandler(M taskManager, String typeTask, Class<T> typeClass) {
+    protected BaseHttpTaskHandler(M taskManager, String typeTask, Class<T> typeClass, Gson gson) {
         this.taskManager = taskManager;
         this.typeTask = typeTask;
         this.typeClass = typeClass;
-
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(Duration.class, new DurationAdapter())
-                .registerTypeAdapter(Instant.class, new InstantAdapter())
-                .create();
+        this.gson = gson;
     }
 
     protected Endpoint getEndpoint(String requestPath, String requestMethod) {

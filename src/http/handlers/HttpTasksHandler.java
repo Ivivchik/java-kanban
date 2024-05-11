@@ -1,5 +1,7 @@
 package http.handlers;
 
+import com.google.gson.Gson;
+import utils.exceptions.ManagerSaveException;
 import utils.exceptions.TaskNotFoundException;
 import utils.exceptions.TaskHasInteractionException;
 
@@ -14,8 +16,8 @@ import java.io.IOException;
 
 public class HttpTasksHandler<M extends TaskManager> extends BaseHttpTaskHandler<M, Task> {
 
-    public HttpTasksHandler(M taskManager) {
-        super(taskManager, "tasks", Task.class);
+    public HttpTasksHandler(M taskManager, Gson gson) {
+        super(taskManager, "tasks", Task.class, gson);
     }
 
     @Override
@@ -43,6 +45,8 @@ public class HttpTasksHandler<M extends TaskManager> extends BaseHttpTaskHandler
             writeResponse(exchange, e.getMessage(), 404);
         } catch (TaskHasInteractionException e) {
             writeResponse(exchange, e.getMessage(), 406);
+        } catch (ManagerSaveException e) {
+            writeResponse(exchange, e.getMessage(), 500);
         }
     }
 

@@ -1,6 +1,8 @@
 package http.handlers;
 
+import com.google.gson.Gson;
 import utils.exceptions.EpicMatchException;
+import utils.exceptions.ManagerSaveException;
 import utils.exceptions.TaskNotFoundException;
 import utils.exceptions.TaskHasInteractionException;
 
@@ -14,8 +16,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 public class HttpSubtasksHandler<M extends TaskManager> extends BaseHttpTaskHandler<M, Subtask> {
-    public HttpSubtasksHandler(M taskManager) {
-        super(taskManager, "subtasks", Subtask.class);
+    public HttpSubtasksHandler(M taskManager, Gson gson) {
+        super(taskManager, "subtasks", Subtask.class, gson);
     }
 
     @Override
@@ -43,17 +45,17 @@ public class HttpSubtasksHandler<M extends TaskManager> extends BaseHttpTaskHand
             writeResponse(exchange, e.getMessage(), 404);
         } catch (TaskHasInteractionException | EpicMatchException e) {
             writeResponse(exchange, e.getMessage(), 406);
+        } catch (ManagerSaveException e) {
+            writeResponse(exchange, e.getMessage(), 500);
         }
     }
 
-    private void handleGetSubtask(HttpExchange exchange)
-            throws IOException, TaskNotFoundException {
+    private void handleGetSubtask(HttpExchange exchange) throws IOException, TaskNotFoundException {
 
         baseHandleGetTask(exchange, taskManager::getSubtask);
     }
 
-    private void handlePostSubtask(HttpExchange exchange)
-            throws IOException, TaskNotFoundException, TaskHasInteractionException, EpicMatchException {
+    private void handlePostSubtask(HttpExchange exchange) throws IOException, TaskNotFoundException, TaskHasInteractionException, EpicMatchException {
 
         baseHandlePostTask(exchange, taskManager::updateSubtask, taskManager::createSubtask);
     }
