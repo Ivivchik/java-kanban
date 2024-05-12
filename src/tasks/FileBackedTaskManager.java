@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 
-import utils.ManagerSaveException;
+import utils.exceptions.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -174,40 +174,40 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public int createTask(Task task) {
+    public int createTask(Task task) throws TaskHasInteractionException {
         int id = super.createTask(task);
         save();
         return id;
     }
 
     @Override
-    public int createEpic(Epic epic) {
+    public int createEpic(Epic epic) throws EpicIllegalArgumentException {
         int id = super.createEpic(epic);
         save();
         return id;
     }
 
     @Override
-    public int createSubtask(Subtask subtask) {
+    public int createSubtask(Subtask subtask) throws TaskNotFoundException, TaskHasInteractionException {
         int id = super.createSubtask(subtask);
         save();
         return id;
     }
 
     @Override
-    public void removeTask(int id) {
+    public void removeTask(int id) throws TaskNotFoundException {
         super.removeTask(id);
         save();
     }
 
     @Override
-    public void removeEpic(int id) {
+    public void removeEpic(int id) throws TaskNotFoundException {
         super.removeEpic(id);
         save();
     }
 
     @Override
-    public void removeSubtask(int id) {
+    public void removeSubtask(int id) throws TaskNotFoundException {
         super.removeSubtask(id);
         save();
     }
@@ -231,39 +231,41 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task newTask) {
+    public void updateTask(Task newTask) throws TaskNotFoundException, TaskHasInteractionException {
         super.updateTask(newTask);
         save();
     }
 
     @Override
-    public void updateEpic(Epic newEpic) {
+    public void updateEpic(Epic newEpic) throws TaskNotFoundException {
         super.updateEpic(newEpic);
         save();
     }
 
     @Override
-    public void updateSubtask(Subtask newSubtask) {
+    public void updateSubtask(Subtask newSubtask)
+            throws TaskNotFoundException, TaskHasInteractionException, EpicMatchException {
+
         super.updateSubtask(newSubtask);
         save();
     }
 
     @Override
-    public Task getTask(int id) {
+    public Task getTask(int id) throws TaskNotFoundException {
         Task t = super.getTask(id);
         save();
         return t;
     }
 
     @Override
-    public Epic getEpic(int id) {
+    public Epic getEpic(int id) throws TaskNotFoundException {
         Epic e = super.getEpic(id);
         save();
         return e;
     }
 
     @Override
-    public Subtask getSubtask(int id) {
+    public Subtask getSubtask(int id) throws TaskNotFoundException {
         Subtask s = super.getSubtask(id);
         save();
         return s;

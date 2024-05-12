@@ -1,6 +1,11 @@
 package tasks;
 
 import utils.Manager;
+import utils.exceptions.EpicMatchException;
+import utils.exceptions.TaskNotFoundException;
+import utils.exceptions.TaskHasInteractionException;
+import utils.exceptions.EpicIllegalArgumentException;
+
 import history.HistoryManager;
 
 import java.time.Duration;
@@ -43,23 +48,26 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createTask(Task task) {
-        if (checkTaskTime(task)) {
-            task.setId(cntId);
-
-            tasks.put(cntId, task);
-            task.getStartTime().ifPresent(i -> prioritizedTasks.add(task));
-
-            cntId++;
-
-            return task.getId();
-        } else {
-            return -1;
+    public int createTask(Task task) throws TaskHasInteractionException {
+        if (!checkTaskTime(task)) {
+            throw new TaskHasInteractionException();
         }
+        task.setId(cntId);
+
+        tasks.put(cntId, task);
+        task.getStartTime().ifPresent(i -> prioritizedTasks.add(task));
+
+        cntId++;
+
+        return task.getId();
     }
 
     @Override
-    public int createEpic(Epic epic) {
+    public int createEpic(Epic epic) throws EpicIllegalArgumentException {
+        int epicSubtasksSize = epic.getSubtasks().size();
+        if (epicSubtasksSize > 0) {
+            throw new EpicIllegalArgumentException("Эпик имеет " + epicSubtasksSize + " подздач. Ожидалось 0");
+        }
         epic.setId(cntId);
         epics.put(cntId, epic);
 
@@ -69,37 +77,48 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createSubtask(Subtask subtask) {
-        if (epics.containsKey(subtask.getEpicId()) && (checkTaskTime(subtask))) {
-            subtask.setId(cntId);
+    public int createSubtask(Subtask subtask) throws TaskNotFoundException, TaskHasInteractionException {
+        int epicId = subtask.getEpicId();
+        Epic epic = epics.get(epicId);
 
-            subtasks.put(cntId, subtask);
-            subtask.getStartTime().ifPresent(i -> prioritizedTasks.add(subtask));
-
-            Epic epic = epics.get(subtask.getEpicId());
-            epic.addSubtaskId(cntId);
-            calculateEpicStatus(epic);
-            calculateEpicDuration(epic);
-
-            cntId++;
-
-            return subtask.getId();
+        if (epic == null) {
+            throw new TaskNotFoundException("Эпика", epicId);
         }
-        return -1;
+        if (!checkTaskTime(subtask)) {
+            throw new TaskHasInteractionException();
+        }
+
+        subtask.setId(cntId);
+
+        subtasks.put(cntId, subtask);
+        subtask.getStartTime().ifPresent(i -> prioritizedTasks.add(subtask));
+
+
+        epic.addSubtaskId(cntId);
+        calculateEpicStatus(epic);
+        calculateEpicDuration(epic);
+
+        cntId++;
+
+        return subtask.getId();
     }
 
     @Override
-    public Task getTask(int id) {
+    public Task getTask(int id) throws TaskNotFoundException {
         Task task = tasks.get(id);
+        if (task == null) {
+            throw new TaskNotFoundException("Задачи", id);
+        }
         historyManager.add(task);
-
         return task;
-
     }
 
     @Override
-    public Epic getEpic(int id) {
+    public Epic getEpic(int id) throws TaskNotFoundException {
         Epic epic = epics.get(id);
+        if (epic == null) {
+            throw new TaskNotFoundException("Эпика", id);
+        }
         historyManager.add(epic);
 
         return epic;
@@ -107,46 +126,59 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask getSubtask(int id) {
+    public Subtask getSubtask(int id) throws TaskNotFoundException {
         Subtask subtask = subtasks.get(id);
+        if (subtask == null) {
+            throw new TaskNotFoundException("Подзадачи", id);
+        }
         historyManager.add(subtask);
 
         return subtask;
     }
 
     @Override
-    public void removeTask(int id) {
+    public void removeTask(int id) throws TaskNotFoundException {
         Task removedTask = tasks.remove(id);
+        if (removedTask == null) {
+            throw new TaskNotFoundException("Задачи", id);
+        }
         removedTask.getStartTime().ifPresent(i -> prioritizedTasks.remove(removedTask));
         historyManager.remove(id);
     }
 
     @Override
-    public void removeEpic(int id) {
-        if (epics.containsKey(id)) {
-            epics.get(id).getSubtasks().forEach(i -> {
-                Subtask removedSubtask = subtasks.remove(i);
-                removedSubtask.getStartTime().ifPresent(inst -> prioritizedTasks.remove(removedSubtask));
-                historyManager.remove(i);
-            });
-            epics.remove(id);
-            historyManager.remove(id);
+    public void removeEpic(int id) throws TaskNotFoundException {
+        Epic removedEpic = epics.remove(id);
+        if (removedEpic == null) {
+            throw new TaskNotFoundException("Эпика", id);
         }
+
+        removedEpic.getSubtasks().forEach(i -> {
+            Subtask removedSubtask = subtasks.remove(i);
+            removedSubtask.getStartTime().ifPresent(inst -> prioritizedTasks.remove(removedSubtask));
+            historyManager.remove(i);
+        });
+
+        historyManager.remove(id);
+
     }
 
     @Override
-    public void removeSubtask(int id) {
-        if (subtasks.containsKey(id)) {
-            int epicId = subtasks.get(id).getEpicId();
-            Epic epic = epics.get(epicId);
-            epic.removeSubtask(id);
-            calculateEpicStatus(epic);
-            calculateEpicDuration(epic);
-
-            Subtask removedSubtask = subtasks.remove(id);
-            removedSubtask.getStartTime().ifPresent(i -> prioritizedTasks.remove(removedSubtask));
-            historyManager.remove(id);
+    public void removeSubtask(int id) throws TaskNotFoundException {
+        Subtask removedSubtask = subtasks.remove(id);
+        if (removedSubtask == null) {
+            throw new TaskNotFoundException("Подзадачи", id);
         }
+
+        Epic epic = epics.get(removedSubtask.getEpicId());
+        epic.removeSubtask(id);
+        calculateEpicStatus(epic);
+        calculateEpicDuration(epic);
+
+
+        removedSubtask.getStartTime().ifPresent(i -> prioritizedTasks.remove(removedSubtask));
+        historyManager.remove(id);
+
     }
 
     @Override
@@ -190,95 +222,113 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public List<Subtask> getTaskFromEpic(int epicId) {
-        return epics.containsKey(epicId)
-                ? epics.get(epicId).getSubtasks().stream()
+    public List<Subtask> getTaskFromEpic(int epicId) throws TaskNotFoundException {
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            throw new TaskNotFoundException("Эпика", epicId);
+        }
+        return epic.getSubtasks().stream()
                 .map(subtasks::get)
-                .collect(Collectors.toList())
-                : new ArrayList<>();
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void updateTask(Task newTask) {
+    public void updateTask(Task newTask) throws TaskNotFoundException, TaskHasInteractionException {
         int taskId = newTask.getId();
-        if (tasks.containsKey(taskId) && checkTaskTime(newTask)) {
-            Task task = tasks.get(taskId);
+        Task task = tasks.get(taskId);
 
-            String name = newTask.getName();
-            String description = newTask.getDescription();
-            Status status = newTask.getStatus();
-            Optional<Duration> duration = newTask.getDuration();
-            Optional<Instant> startTime = newTask.getStartTime();
-
-            if (name != null) {
-                task.setName(name);
-            }
-            if (description != null) {
-                task.setDescription(description);
-            }
-            if (status != null) {
-                task.setStatus(status);
-            }
-            duration.ifPresent(task::setDuration);
-            startTime.ifPresent(i -> {
-                task.setStartTime(i);
-                prioritizedTasks.add(task);
-            });
+        if (task == null) {
+            throw new TaskNotFoundException("Задачи", taskId);
         }
+        if (!checkTaskTime(newTask)) {
+            throw new TaskHasInteractionException();
+        }
+
+        String name = newTask.getName();
+        String description = newTask.getDescription();
+        Status status = newTask.getStatus();
+        Optional<Duration> duration = newTask.getDuration();
+        Optional<Instant> startTime = newTask.getStartTime();
+
+        if (name != null) {
+            task.setName(name);
+        }
+        if (description != null) {
+            task.setDescription(description);
+        }
+        if (status != null) {
+            task.setStatus(status);
+        }
+        duration.ifPresent(task::setDuration);
+        startTime.ifPresent(i -> {
+            task.setStartTime(i);
+            prioritizedTasks.add(task);
+        });
     }
 
     @Override
-    public void updateEpic(Epic newEpic) {
+    public void updateEpic(Epic newEpic) throws TaskNotFoundException {
         int epicId = newEpic.getId();
-        if (epics.containsKey(epicId)) {
-            Epic epic = epics.get(epicId);
 
-            String name = newEpic.getName();
-            String description = newEpic.getDescription();
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            throw new TaskNotFoundException("Эпика", epicId);
+        }
 
-            if (name != null) {
-                epic.setName(name);
-            }
-            if (description != null) {
-                epic.setDescription(description);
-            }
+        String name = newEpic.getName();
+        String description = newEpic.getDescription();
+
+        if (name != null) {
+            epic.setName(name);
+        }
+        if (description != null) {
+            epic.setDescription(description);
         }
     }
 
     @Override
-    public void updateSubtask(Subtask newSubtask) {
+    public void updateSubtask(Subtask newSubtask)
+            throws TaskNotFoundException, TaskHasInteractionException, EpicMatchException {
+
         int subtaskId = newSubtask.getId();
-        if (subtasks.containsKey(subtaskId) && checkTaskTime(newSubtask)) {
-            Subtask subtask = subtasks.get(subtaskId);
-
-            if (subtask.getEpicId() == newSubtask.getEpicId()) {
-
-                String name = newSubtask.getName();
-                String description = newSubtask.getDescription();
-                Status status = newSubtask.getStatus();
-                Optional<Duration> duration = newSubtask.getDuration();
-                Optional<Instant> startTime = newSubtask.getStartTime();
-
-                if (name != null) {
-                    subtask.setName(name);
-                }
-                if (description != null) {
-                    subtask.setDescription(description);
-                }
-                if (status != null) {
-                    subtask.setStatus(status);
-                }
-                duration.ifPresent(subtask::setDuration);
-                startTime.ifPresent(i -> {
-                    subtask.setStartTime(i);
-                    prioritizedTasks.add(subtask);
-                });
-
-                Epic epic = epics.get(subtask.getEpicId());
-                calculateEpicStatus(epic);
-                calculateEpicDuration(epic);
-            }
+        Subtask subtask = subtasks.get(subtaskId);
+        if (subtask == null) {
+            throw new TaskNotFoundException("Подзадачи", subtaskId);
         }
+        if (!checkTaskTime(newSubtask)) {
+            throw new TaskHasInteractionException();
+        }
+
+        if (subtask.getEpicId() != newSubtask.getEpicId()) {
+            throw new EpicMatchException("Идентификаторы эпиков не совпадают");
+        }
+
+        String name = newSubtask.getName();
+        String description = newSubtask.getDescription();
+        Status status = newSubtask.getStatus();
+        Optional<Duration> duration = newSubtask.getDuration();
+        Optional<Instant> startTime = newSubtask.getStartTime();
+
+        if (name != null) {
+            subtask.setName(name);
+        }
+        if (description != null) {
+            subtask.setDescription(description);
+        }
+        if (status != null) {
+            subtask.setStatus(status);
+        }
+        duration.ifPresent(subtask::setDuration);
+        startTime.ifPresent(i -> {
+            subtask.setStartTime(i);
+            prioritizedTasks.add(subtask);
+        });
+
+        Epic epic = epics.get(subtask.getEpicId());
+        calculateEpicStatus(epic);
+        calculateEpicDuration(epic);
+
+
     }
 
     private void calculateEpicStatus(Epic epic) {
